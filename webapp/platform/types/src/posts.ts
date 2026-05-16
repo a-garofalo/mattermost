@@ -171,6 +171,8 @@ export type PostsState = {
         threads: Record<Post['root_id'], number>;
     };
     acknowledgements: RelationOneToOne<Post, Record<UserProfile['id'], number>>;
+    /** Client-side map of post ids to reminder target time (unix seconds) for the current session; cleared on logout. */
+    localPostReminders: Record<Post['id'], number>;
 };
 
 export declare type OpenGraphMetadataImage = {

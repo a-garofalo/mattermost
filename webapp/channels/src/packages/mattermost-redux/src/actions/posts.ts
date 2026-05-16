@@ -141,6 +141,13 @@ export function postRemoved(post: Post) {
     };
 }
 
+export function receivedLocalPostReminder(postId: string, targetTime: number) {
+    return {
+        type: PostTypes.RECEIVED_LOCAL_POST_REMINDER,
+        data: {postId, targetTime},
+    };
+}
+
 export function postPinnedChanged(postId: string, isPinned: boolean, updateAt = Date.now()) {
     return {
         type: PostTypes.POST_PINNED_CHANGED,
@@ -1223,6 +1230,7 @@ export function addPostReminder(userId: string, postId: string, timestamp: numbe
             dispatch(logError(error));
             return {error};
         }
+        dispatch(receivedLocalPostReminder(postId, timestamp));
         return {data: true};
     };
 }
