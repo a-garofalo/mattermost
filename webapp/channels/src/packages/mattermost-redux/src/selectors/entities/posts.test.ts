@@ -104,6 +104,28 @@ describe('Selectors.Posts', () => {
         expect(getReactionsForPost(testState, posts.a.id)).toEqual(reactionA);
     });
 
+    it('should return active post reminder target times', () => {
+        jest.spyOn(Date, 'now').mockReturnValue(1000);
+
+        const state = deepFreezeAndThrowOnMutation({
+            entities: {
+                posts: {
+                    activePostReminders: {
+                        activePost: 2,
+                        expiredPost: 1,
+                    },
+                },
+            },
+        } as GlobalState);
+
+        expect(Selectors.getPostReminderTargetTime(state, 'activePost')).toBe(2);
+        expect(Selectors.isPostReminderActive(state, 'activePost')).toBe(true);
+        expect(Selectors.getPostReminderTargetTime(state, 'expiredPost')).toBeUndefined();
+        expect(Selectors.isPostReminderActive(state, 'expiredPost')).toBe(false);
+
+        jest.restoreAllMocks();
+    });
+
     it('should return profiles for reactions', () => {
         const getProfilesForReactions = makeGetProfilesForReactions();
         expect(getProfilesForReactions(testState, [reaction1])).toEqual([user1]);

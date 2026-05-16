@@ -62,6 +62,18 @@ describe('PostComponent', () => {
         isChannelAutotranslated: false,
     };
 
+    test('should highlight posts with an active reminder', () => {
+        renderWithContext(
+            <PostComponent
+                {...baseProps}
+                isPostReminderActive={true}
+            />,
+        );
+
+        expect(screen.getByTestId('postView')).toHaveClass('post--reminder-active');
+        expect(screen.getByText('Reminder set')).toBeInTheDocument();
+    });
+
     describe('reactions', () => {
         const baseState: DeepPartial<GlobalState> = {
             entities: {

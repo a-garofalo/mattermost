@@ -54,6 +54,19 @@ export function isPostFlagged(state: GlobalState, postId: Post['id']): boolean {
     return getBool(state, Preferences.CATEGORY_FLAGGED_POST, postId);
 }
 
+export function getPostReminderTargetTime(state: GlobalState, postId: Post['id']): number | undefined {
+    const targetTime = state.entities.posts.activePostReminders?.[postId];
+    if (!targetTime || targetTime <= Date.now() / 1000) {
+        return undefined;
+    }
+
+    return targetTime;
+}
+
+export function isPostReminderActive(state: GlobalState, postId: Post['id']): boolean {
+    return Boolean(getPostReminderTargetTime(state, postId));
+}
+
 export function getPostRepliesCount(state: GlobalState, postId: Post['id']): number {
     return state.entities.posts.postsReplies[postId] || 0;
 }

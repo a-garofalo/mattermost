@@ -43,6 +43,7 @@ export default keyMirror({
     POST_TRANSLATION_UPDATED: null,
 
     POST_PINNED_CHANGED: null,
+    POST_REMINDER_SET: null,
 
     RECEIVED_FOCUSED_POST: null,
     RECEIVED_EDIT_POST: null,

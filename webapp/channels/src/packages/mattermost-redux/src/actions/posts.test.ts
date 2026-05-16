@@ -14,7 +14,7 @@ import {createCustomEmoji} from 'mattermost-redux/actions/emojis';
 import * as Actions from 'mattermost-redux/actions/posts';
 import {loadMe} from 'mattermost-redux/actions/users';
 import {Client4} from 'mattermost-redux/client';
-import {isPostFlagged} from 'mattermost-redux/selectors/entities/posts';
+import {isPostFlagged, isPostReminderActive} from 'mattermost-redux/selectors/entities/posts';
 import type {GetStateFunc} from 'mattermost-redux/types/actions';
 
 import mockStore from 'tests/test_store';
@@ -1073,6 +1073,21 @@ describe('Actions.Posts', () => {
         dispatch(Actions.unflagPost(post1.id));
 
         expect(isPostFlagged(getState(), post1.id)).toBe(false);
+    });
+
+    it('addPostReminder', async () => {
+        const {dispatch, getState} = store;
+        const userId = TestHelper.generateId();
+        const postId = TestHelper.generateId();
+        const targetTime = Math.floor(Date.now() / 1000) + 3600;
+
+        nock(Client4.getUserRoute(userId)).
+            post(`/posts/${postId}/reminder`, {target_time: targetTime}).
+            reply(200, OK_RESPONSE);
+
+        await dispatch(Actions.addPostReminder(userId, postId, targetTime));
+
+        expect(isPostReminderActive(getState(), postId)).toBe(true);
     });
 
     it('setUnreadPost', async () => {

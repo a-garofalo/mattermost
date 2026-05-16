@@ -68,6 +68,7 @@ export type Props = {
     compactDisplay?: boolean;
     colorizeUsernames?: boolean;
     isFlagged: boolean;
+    isPostReminderActive?: boolean;
     previewCollapsed?: string;
     previewEnabled?: boolean;
     isEmbedVisible?: boolean;
@@ -328,6 +329,7 @@ function PostComponent(props: Props) {
             'post--hide-controls': post.failed || post.state === Posts.POST_DELETED,
             'post--comment same--root': fromAutoResponder,
             'post--pinned-or-flagged': (post.is_pinned || props.isFlagged) && props.location === Locations.CENTER,
+            'post--reminder-active': props.isPostReminderActive,
             'mention-comment': props.isCommentMention,
             'post--thread': isRHS,
             'post--modal': isModal,
@@ -779,6 +781,7 @@ function PostComponent(props: Props) {
                 <PostPreHeader
                     isFlagged={props.isFlagged}
                     isPinned={post.is_pinned}
+                    isReminderSet={props.isPostReminderActive}
                     skipPinned={props.location === Locations.SEARCH && props.isPinnedPosts}
                     skipFlagged={props.location === Locations.SEARCH && props.isFlaggedPosts}
                     channelId={post.channel_id}

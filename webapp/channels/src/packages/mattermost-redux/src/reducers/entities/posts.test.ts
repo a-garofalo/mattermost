@@ -4670,6 +4670,43 @@ describe('postsReplies', () => {
     });
 });
 
+describe('activePostReminders', () => {
+    it('stores the reminder target time for a post', () => {
+        const state = deepFreeze({});
+
+        const nextState = reducers.activePostReminders(state, {
+            type: PostTypes.POST_REMINDER_SET,
+            data: {
+                postId: 'post1',
+                targetTime: 123456,
+            },
+        });
+
+        expect(nextState).toEqual({post1: 123456});
+    });
+
+    it('removes reminders for deleted or removed posts', () => {
+        const state = deepFreeze({post1: 123456, post2: 123457});
+
+        const nextState = reducers.activePostReminders(state, {
+            type: PostTypes.POST_REMOVED,
+            data: {id: 'post1'},
+        });
+
+        expect(nextState).toEqual({post2: 123457});
+    });
+
+    it('clears reminders on logout', () => {
+        const state = deepFreeze({post1: 123456});
+
+        const nextState = reducers.activePostReminders(state, {
+            type: UserTypes.LOGOUT_SUCCESS,
+        });
+
+        expect(nextState).toEqual({});
+    });
+});
+
 describe('limitedViews', () => {
     const zeroState = deepFreeze(reducers.zeroStateLimitedViews);
     const receivedPostActions = [

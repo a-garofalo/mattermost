@@ -48,6 +48,22 @@ describe('components/PostPreHeader', () => {
         expect(container).toMatchSnapshot();
     });
 
+    test('should show reminder indicator when a reminder is set', () => {
+        const props = {
+            ...baseProps,
+            isFlagged: false,
+            isPinned: false,
+            isReminderSet: true,
+        };
+
+        const {container} = renderWithContext(
+            <PostPreHeader {...props}/>,
+        );
+
+        expect(container.querySelector('.post-pre-header__reminder-icon')).not.toBeNull();
+        expect(screen.getByText('Reminder set')).toBeInTheDocument();
+    });
+
     test('should properly handle flagged posts (and not pinned)', () => {
         const props = {
             ...baseProps,

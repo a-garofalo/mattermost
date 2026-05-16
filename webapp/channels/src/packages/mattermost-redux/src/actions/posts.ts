@@ -1223,6 +1223,14 @@ export function addPostReminder(userId: string, postId: string, timestamp: numbe
             dispatch(logError(error));
             return {error};
         }
+        dispatch({
+            type: PostTypes.POST_REMINDER_SET,
+            data: {
+                postId,
+                targetTime: timestamp,
+            },
+        });
+
         return {data: true};
     };
 }

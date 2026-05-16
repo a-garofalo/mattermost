@@ -157,6 +157,37 @@ export function nextPostsReplies(state: {[x in Post['id']]: number} = {}, action
     }
 }
 
+export function activePostReminders(state: {[x in Post['id']]: number} = {}, action: MMReduxAction) {
+    switch (action.type) {
+    case PostTypes.POST_REMINDER_SET: {
+        const {postId, targetTime} = action.data;
+        if (state[postId] === targetTime) {
+            return state;
+        }
+
+        return {
+            ...state,
+            [postId]: targetTime,
+        };
+    }
+    case PostTypes.POST_DELETED:
+    case PostTypes.POST_REMOVED: {
+        const post: Post = action.data;
+        if (!state[post.id]) {
+            return state;
+        }
+
+        const nextState = {...state};
+        Reflect.deleteProperty(nextState, post.id);
+        return nextState;
+    }
+    case UserTypes.LOGOUT_SUCCESS:
+        return {};
+    default:
+        return state;
+    }
+}
+
 // Helper function to remove posts and permalink embeds for a set of channel IDs.
 function removePostsAndEmbedsForChannels(state: IDMappedObjects<Post>, channelIds: Set<string>): IDMappedObjects<Post> {
     let postModified = false;
@@ -1735,6 +1766,9 @@ export default function reducer(state: Partial<PostsState> = {}, action: MMRedux
         // Object mapping post ids to replies count
         postsReplies: nextPostsReplies(state.postsReplies, action),
 
+        // Object mapping posts to the current user's active reminder target time
+        activePostReminders: activePostReminders(state.activePostReminders, action),
+
         // Array that contains the pending post ids for those messages that are in transition to being created
         pendingPostIds: handlePendingPosts(state.pendingPostIds, action),
 
@@ -1769,6 +1803,7 @@ export default function reducer(state: Partial<PostsState> = {}, action: MMRedux
 
     if (state.posts === nextState.posts && state.postsInChannel === nextState.postsInChannel &&
         state.postsInThread === nextState.postsInThread &&
+        state.activePostReminders === nextState.activePostReminders &&
         state.pendingPostIds === nextState.pendingPostIds &&
         state.postEditHistory === nextState.postEditHistory &&
         state.currentFocusedPostId === nextState.currentFocusedPostId &&

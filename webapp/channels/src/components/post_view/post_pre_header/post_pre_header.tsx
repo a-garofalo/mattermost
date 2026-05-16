@@ -5,12 +5,15 @@ import React from 'react';
 import {FormattedMessage, defineMessages, injectIntl} from 'react-intl';
 import type {IntlShape} from 'react-intl';
 
+import {ClockOutlineIcon} from '@mattermost/compass-icons/components';
+
 import FlagIconFilled from 'components/widgets/icons/flag_icon_filled';
 
 export type Props = {
     intl: IntlShape;
     isFlagged: boolean;
     isPinned?: boolean;
+    isReminderSet?: boolean;
     skipPinned?: boolean;
     skipFlagged?: boolean;
     channelId: string;
@@ -89,11 +92,11 @@ class PostPreHeader extends React.PureComponent<Props> {
     };
 
     render() {
-        const {isFlagged, isPinned, skipPinned, skipFlagged, channelId} = this.props;
+        const {isFlagged, isPinned, isReminderSet, skipPinned, skipFlagged, channelId} = this.props;
 
         const messageKey = this.getMessageInfo(this.getPostStatus(isFlagged, isPinned), skipFlagged, skipPinned);
 
-        if ((!isFlagged && !isPinned) || !messageKey) {
+        if (!messageKey && !isReminderSet) {
             return null;
         }
 
@@ -102,6 +105,7 @@ class PostPreHeader extends React.PureComponent<Props> {
                 <div className='post-pre-header__icons-container'>
                     {isPinned && !skipPinned && <span className='icon-pin icon icon--post-pre-header'/>}
                     {isFlagged && !skipFlagged && <FlagIconFilled className='icon icon--post-pre-header'/>}
+                    {isReminderSet && <ClockOutlineIcon className='post-pre-header__reminder-icon icon icon--post-pre-header'/>}
                 </div>
                 <div className='post-pre-header__text-container'>
                     {messageKey &&
@@ -130,6 +134,16 @@ class PostPreHeader extends React.PureComponent<Props> {
                             </a>
                         </span>
                     )}
+                    {isReminderSet && (
+                        <span>
+                            {messageKey && (
+                                <span className='post-pre-header__link-separator'>{'\u2B24'}</span>
+                            )}
+                            <FormattedMessage
+                                {...messages.reminderSet}
+                            />
+                        </span>
+                    )}
                 </div>
             </div>
         );
@@ -144,6 +158,10 @@ const messages = defineMessages({
     [MessageInfoKey.Pinned]: {
         id: 'post_pre_header.pinned',
         defaultMessage: 'Pinned',
+    },
+    reminderSet: {
+        id: 'post_pre_header.reminder_set',
+        defaultMessage: 'Reminder set',
     },
 });
 

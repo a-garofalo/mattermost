@@ -2251,6 +2251,18 @@
     }
 }
 
+.post--reminder-active {
+    background-color: rgba(var(--button-bg-rgb), 0.08);
+    box-shadow: inset 3px 0 0 var(--button-bg);
+
+    .post-collapse {
+        .post-collapse__show-more,
+        .post-attachment-collapse__show-more {
+            pointer-events: auto;
+        }
+    }
+}
+
 .post__header-set-custom-status {
     display: none;
 }

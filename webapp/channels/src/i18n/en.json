@@ -5820,6 +5820,7 @@
   "post_message_view.view_post_edit_history": "Click to view history",
   "post_pre_header.flagged": "Saved",
   "post_pre_header.pinned": "Pinned",
+  "post_pre_header.reminder_set": "Reminder set",
   "post_priority.acknowledgements.title": "Acknowledgements",
   "post_priority.button.acknowledge": "Acknowledge",
   "post_priority.error.no_mentions": "Recipients must be @mentioned",
