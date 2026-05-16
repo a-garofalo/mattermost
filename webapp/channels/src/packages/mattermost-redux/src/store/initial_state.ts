@@ -79,6 +79,7 @@ const state: GlobalState = {
         posts: {
             posts: {},
             postsReplies: {},
+            activePostReminders: {},
             postsInChannel: {},
             postsInThread: {},
             pendingPostIds: [],

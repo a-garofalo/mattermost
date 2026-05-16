@@ -116,7 +116,7 @@ describe('Selectors.Posts', () => {
                     },
                 },
             },
-        } as GlobalState);
+        } as unknown as GlobalState);
 
         expect(Selectors.getPostReminderTargetTime(state, 'activePost')).toBe(2);
         expect(Selectors.isPostReminderActive(state, 'activePost')).toBe(true);
