@@ -6,6 +6,7 @@ import React, {useCallback, useEffect, useRef, useState, useMemo} from 'react';
 import type {MouseEvent} from 'react';
 import {FormattedMessage, useIntl} from 'react-intl';
 
+import {ClockOutlineIcon} from '@mattermost/compass-icons/components';
 import {WithTooltip} from '@mattermost/shared/components/tooltip';
 import type {Emoji} from '@mattermost/types/emojis';
 import type {Post} from '@mattermost/types/posts';
@@ -167,6 +168,7 @@ function PostComponent(props: Props) {
 
     const isSystemMessage = PostUtils.isSystemMessage(post);
     const fromAutoResponder = PostUtils.fromAutoResponder(post);
+    const hasActiveReminder = (post.metadata?.reminder_target_time ?? 0) > (Date.now() / 1000) && post.state !== Posts.POST_DELETED;
 
     useEffect(() => {
         if (shouldHighlight) {
@@ -328,6 +330,7 @@ function PostComponent(props: Props) {
             'post--hide-controls': post.failed || post.state === Posts.POST_DELETED,
             'post--comment same--root': fromAutoResponder,
             'post--pinned-or-flagged': (post.is_pinned || props.isFlagged) && props.location === Locations.CENTER,
+            'post--has-reminder': hasActiveReminder,
             'mention-comment': props.isCommentMention,
             'post--thread': isRHS,
             'post--modal': isModal,
@@ -657,6 +660,32 @@ function PostComponent(props: Props) {
         priority = <span className='d-flex'><PriorityLabel priority={post.metadata.priority.priority}/></span>;
     }
 
+    let reminderLabel;
+    if (hasActiveReminder) {
+        const reminderLabelText = formatMessage({
+            id: 'post.reminder.indicator.label',
+            defaultMessage: 'Reminder set',
+        });
+
+        reminderLabel = (
+            <WithTooltip
+                title={formatMessage({
+                    id: 'post.reminder.indicator.tooltip',
+                    defaultMessage: 'Reminder set for this message',
+                })}
+            >
+                <span
+                    className='post-reminder-label'
+                    aria-label={reminderLabelText}
+                    data-testid='post-reminder-label'
+                >
+                    <ClockOutlineIcon size={10}/>
+                    {reminderLabelText}
+                </span>
+            </WithTooltip>
+        );
+    }
+
     // Burn-on-Read badge logic
     // Badge handles expiration scheduling internally via BurnOnReadExpirationHandler
     // Only shows on first post in series (not consecutive posts)
@@ -813,6 +842,7 @@ function PostComponent(props: Props) {
                                     />
                                 }
                                 {priority}
+                                {reminderLabel}
                                 {burnOnReadBadge}
                                 {burnOnReadTimerChip}
                                 {((!props.compactDisplay && !(hasSameRoot(props) && props.isConsecutivePost)) || (props.compactDisplay && isRHS)) &&

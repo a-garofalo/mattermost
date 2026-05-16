@@ -150,6 +150,14 @@ export function postPinnedChanged(postId: string, isPinned: boolean, updateAt = 
     };
 }
 
+export function postReminderUpdated(postId: string, targetTime: number) {
+    return {
+        type: PostTypes.POST_REMINDER_UPDATED,
+        postId,
+        targetTime,
+    };
+}
+
 export function getPost(postId: string, includeDeleted?: boolean, retainContent?: boolean): ActionFuncAsync<Post> {
     return async (dispatch, getState) => {
         let post;
@@ -1223,6 +1231,7 @@ export function addPostReminder(userId: string, postId: string, timestamp: numbe
             dispatch(logError(error));
             return {error};
         }
+        dispatch(postReminderUpdated(postId, timestamp));
         return {data: true};
     };
 }

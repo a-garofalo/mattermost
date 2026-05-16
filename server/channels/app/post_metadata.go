@@ -238,6 +238,8 @@ func (a *App) PreparePostForClient(rctx request.CTX, originalPost *model.Post, o
 		}
 	}
 
+	a.populatePostReminderMetadataForUser(rctx, post)
+
 	if opts.IncludePriority && a.IsPostPriorityEnabled() && post.RootId == "" {
 		// Use context-aware method to respect master/replica flag
 		if priority, err := a.GetPriorityForPostWithContext(rctx, post.Id); err != nil {
@@ -255,6 +257,27 @@ func (a *App) PreparePostForClient(rctx request.CTX, originalPost *model.Post, o
 	}
 
 	return post
+}
+
+func (a *App) populatePostReminderMetadataForUser(rctx request.CTX, post *model.Post) {
+	userID := rctx.Session().UserId
+	if userID == "" || post.Id == "" {
+		return
+	}
+
+	reminders, err := a.Srv().Store().Post().GetPostRemindersForPost(post.Id)
+	if err != nil {
+		rctx.Logger().Warn("Failed to get post reminders for a post", mlog.String("post_id", post.Id), mlog.Err(err))
+		return
+	}
+
+	now := time.Now().UTC().Unix()
+	for _, reminder := range reminders {
+		if reminder.UserId == userID && reminder.TargetTime > now {
+			post.Metadata.ReminderTargetTime = reminder.TargetTime
+			return
+		}
+	}
 }
 
 func (a *App) preparePostFilesForClient(rctx request.CTX, post *model.Post, opts *model.PreparePostForClientOpts) *model.Post {
