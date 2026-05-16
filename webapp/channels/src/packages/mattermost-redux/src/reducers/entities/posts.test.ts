@@ -10,6 +10,7 @@ import {
     ThreadTypes,
     CloudTypes,
     LimitsTypes,
+    UserTypes,
 } from 'mattermost-redux/action_types';
 import {Posts} from 'mattermost-redux/constants';
 import * as reducers from 'mattermost-redux/reducers/entities/posts';
