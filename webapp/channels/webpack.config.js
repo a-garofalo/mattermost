@@ -137,6 +137,12 @@ var config = {
 
             // This alias restricts single version of styled components across all packages
             'styled-components': path.resolve(__dirname, '..', 'node_modules', 'styled-components'),
+
+            // Production bundles must not use react/jsx-dev-runtime (its production entry leaves
+            // jsxDEV undefined). Shared packages may still import it; map to jsx-runtime helpers.
+            ...(!DEV && {
+                'react/jsx-dev-runtime': path.resolve(__dirname, 'src', 'react-jsx-dev-runtime.production-shim.js'),
+            }),
         },
         extensions: ['.ts', '.tsx', '.js', '.jsx'],
         fallback: {

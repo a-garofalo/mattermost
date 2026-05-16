@@ -13,6 +13,8 @@ const externals = [
     ...Object.keys(packagejson.peerDependencies || {}),
     'lodash/throttle',
     'react',
+    'react/jsx-runtime',
+    'react/jsx-dev-runtime',
     'mattermost-redux',
     'reselect',
 ];
