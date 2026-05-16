@@ -6,6 +6,7 @@ import React, {useCallback, useEffect, useRef, useState, useMemo} from 'react';
 import type {MouseEvent} from 'react';
 import {FormattedMessage, useIntl} from 'react-intl';
 
+import {ClockOutlineIcon} from '@mattermost/compass-icons/components';
 import {WithTooltip} from '@mattermost/shared/components/tooltip';
 import type {Emoji} from '@mattermost/types/emojis';
 import type {Post} from '@mattermost/types/posts';
@@ -138,13 +139,14 @@ export type Props = {
     burnOnReadSkipConfirmation?: boolean;
     preventClickInteraction?: boolean;
     permissionPoliciesEnabled: boolean;
+    postReminderTargetTime?: number;
 };
 
 const preventInteractionStyle: React.CSSProperties = {pointerEvents: 'none'};
 
 function PostComponent(props: Props) {
     const {post, shouldHighlight, togglePostMenu} = props;
-    const {formatMessage} = useIntl();
+    const {formatMessage, formatDate} = useIntl();
 
     const isSearchResultItem = (props.matches && props.matches.length > 0) || props.isMentionSearch || (props.term && props.term.length > 0);
     const isRHS = props.location === Locations.RHS_ROOT || props.location === Locations.RHS_COMMENT || props.location === Locations.SEARCH;
@@ -167,6 +169,19 @@ function PostComponent(props: Props) {
 
     const isSystemMessage = PostUtils.isSystemMessage(post);
     const fromAutoResponder = PostUtils.fromAutoResponder(post);
+
+    const reminderHighlightLocations =
+        props.location === Locations.CENTER ||
+        props.location === Locations.RHS_ROOT ||
+        props.location === Locations.RHS_COMMENT;
+    const hasActiveReminder = Boolean(
+        props.postReminderTargetTime &&
+        props.postReminderTargetTime * 1000 > Date.now() &&
+        reminderHighlightLocations &&
+        !isSystemMessage &&
+        post.type !== Constants.PostTypes.EPHEMERAL &&
+        post.state !== Posts.POST_DELETED,
+    );
 
     useEffect(() => {
         if (shouldHighlight) {
@@ -328,6 +343,7 @@ function PostComponent(props: Props) {
             'post--hide-controls': post.failed || post.state === Posts.POST_DELETED,
             'post--comment same--root': fromAutoResponder,
             'post--pinned-or-flagged': (post.is_pinned || props.isFlagged) && props.location === Locations.CENTER,
+            'post--reminder-active': hasActiveReminder,
             'mention-comment': props.isCommentMention,
             'post--thread': isRHS,
             'post--modal': isModal,
@@ -815,6 +831,36 @@ function PostComponent(props: Props) {
                                 {priority}
                                 {burnOnReadBadge}
                                 {burnOnReadTimerChip}
+                                {hasActiveReminder && props.postReminderTargetTime && (
+                                    <WithTooltip
+                                        id={`postReminderTooltip-${post.id}`}
+                                        title={formatMessage(
+                                            {
+                                                id: 'post_info.reminder_set_indicator',
+                                                defaultMessage: 'Reminder set for {when}',
+                                            },
+                                            {
+                                                when: formatDate(new Date(props.postReminderTargetTime * 1000), {
+                                                    dateStyle: 'medium',
+                                                    timeStyle: 'short',
+                                                }),
+                                            },
+                                        )}
+                                    >
+                                        <span
+                                            className='post__reminder-indicator'
+                                            aria-label={formatMessage({
+                                                id: 'post_info.reminder_set_indicator_aria',
+                                                defaultMessage: 'Reminder set',
+                                            })}
+                                        >
+                                            <ClockOutlineIcon
+                                                size={16}
+                                                aria-hidden='true'
+                                            />
+                                        </span>
+                                    </WithTooltip>
+                                )}
                                 {((!props.compactDisplay && !(hasSameRoot(props) && props.isConsecutivePost)) || (props.compactDisplay && isRHS)) &&
                                     PostUtils.hasAiGeneratedMetadata(post) && (
                                     <AiGeneratedIndicator

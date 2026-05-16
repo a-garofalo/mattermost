@@ -66,4 +66,7 @@ export default keyMirror({
     REVEAL_BURN_ON_READ_SUCCESS: null,
     POST_RECIPIENTS_UPDATED: null,
     BURN_ON_READ_ALL_REVEALED: null,
+
+    /** Tracks posts the current user has set a reminder on (session UI state after successful API call). */
+    RECEIVED_LOCAL_POST_REMINDER: null,
 });

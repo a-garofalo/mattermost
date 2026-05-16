@@ -1723,6 +1723,32 @@ export function limitedViews(
     }
 }
 
+export function localPostReminders(state: Record<string, number> = {}, action: MMReduxAction): Record<string, number> {
+    switch (action.type) {
+    case PostTypes.RECEIVED_LOCAL_POST_REMINDER: {
+        const {postId, targetTime} = action.data as {postId: string; targetTime: number};
+        return {
+            ...state,
+            [postId]: targetTime,
+        };
+    }
+    case PostTypes.POST_DELETED:
+    case PostTypes.POST_REMOVED: {
+        const post = action.data as Post;
+        if (!post?.id || state[post.id] === undefined) {
+            return state;
+        }
+        const nextState = {...state};
+        Reflect.deleteProperty(nextState, post.id);
+        return nextState;
+    }
+    case UserTypes.LOGOUT_SUCCESS:
+        return {};
+    default:
+        return state;
+    }
+}
+
 export default function reducer(state: Partial<PostsState> = {}, action: MMReduxAction) {
     const nextPosts = handlePosts(state.posts, action);
     const nextPostsInChannel = postsInChannel(state.postsInChannel, action, state.posts!, nextPosts);
@@ -1765,6 +1791,9 @@ export default function reducer(state: Partial<PostsState> = {}, action: MMRedux
         // whether this particular view has messages that are hidden
         // because of the cloud workspace limit.
         limitedViews: limitedViews(state.limitedViews, action),
+
+        // Posts the current user has set a reminder on in this session (for UI highlight).
+        localPostReminders: localPostReminders(state.localPostReminders, action),
     };
 
     if (state.posts === nextState.posts && state.postsInChannel === nextState.postsInChannel &&
@@ -1776,7 +1805,8 @@ export default function reducer(state: Partial<PostsState> = {}, action: MMRedux
         state.acknowledgements === nextState.acknowledgements &&
         state.openGraph === nextState.openGraph &&
         state.messagesHistory === nextState.messagesHistory &&
-        state.limitedViews === nextState.limitedViews) {
+        state.limitedViews === nextState.limitedViews &&
+        state.localPostReminders === nextState.localPostReminders) {
         // None of the children have changed so don't even let the parent object change
         return state;
     }

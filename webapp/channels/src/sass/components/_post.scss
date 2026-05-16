@@ -2251,6 +2251,24 @@
     }
 }
 
+.post.post--reminder-active {
+    background-color: rgba(var(--link-color-rgb), 0.1);
+
+    .post-collapse {
+        .post-collapse__show-more,
+        .post-attachment-collapse__show-more {
+            pointer-events: auto;
+        }
+    }
+}
+
+.post__reminder-indicator {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 4px;
+    color: rgba(var(--link-color-rgb), 0.88);
+}
+
 .post__header-set-custom-status {
     display: none;
 }

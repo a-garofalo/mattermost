@@ -5801,6 +5801,8 @@
   "post_info.post_reminder.sub_menu.tomorrow": "Tomorrow",
   "post_info.post_reminder.sub_menu.two_hours": "2 hours",
   "post_info.quarantine": "Quarantine for Review",
+  "post_info.reminder_set_indicator": "Reminder set for {when}",
+  "post_info.reminder_set_indicator_aria": "Reminder set",
   "post_info.reply": "Reply",
   "post_info.show_translation": "Show translation",
   "post_info.submenu.icon": "submenu icon",

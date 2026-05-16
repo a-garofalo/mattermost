@@ -95,6 +95,7 @@ const state: GlobalState = {
             },
             limitedViews: zeroStateLimitedViews,
             acknowledgements: {},
+            localPostReminders: {},
         },
         threads: {
             threadsInTeam: {},

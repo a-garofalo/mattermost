@@ -50,6 +50,10 @@ export function getPost(state: GlobalState, postId: Post['id']): Post {
     return getAllPosts(state)[postId];
 }
 
+export function getLocalPostReminderTargetTime(state: GlobalState, postId: Post['id']): number | undefined {
+    return state.entities.posts.localPostReminders?.[postId];
+}
+
 export function isPostFlagged(state: GlobalState, postId: Post['id']): boolean {
     return getBool(state, Preferences.CATEGORY_FLAGGED_POST, postId);
 }
