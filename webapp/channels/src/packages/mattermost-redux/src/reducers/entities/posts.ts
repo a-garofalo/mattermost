@@ -332,6 +332,25 @@ export function handlePosts(state: IDMappedObjects<Post> = {}, action: MMReduxAc
         };
     }
 
+    case PostTypes.POST_REMINDER_UPDATED: {
+        const {postId, targetTime} = action;
+
+        if (!state[postId]) {
+            return state;
+        }
+
+        return {
+            ...state,
+            [postId]: {
+                ...state[postId],
+                metadata: {
+                    ...state[postId].metadata,
+                    reminder_target_time: targetTime,
+                },
+            },
+        };
+    }
+
     case PostTypes.REVEAL_BURN_ON_READ_SUCCESS: {
         const {post, expireAt} = action.data;
 

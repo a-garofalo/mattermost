@@ -154,6 +154,42 @@ describe('posts', () => {
         });
     }
 
+    describe('post reminder updated', () => {
+        it('should update reminder target time metadata for an existing post', () => {
+            const state = deepFreeze({
+                post1: {
+                    id: 'post1',
+                    metadata: {},
+                },
+            });
+
+            const nextState = reducers.handlePosts(state, {
+                type: PostTypes.POST_REMINDER_UPDATED,
+                postId: 'post1',
+                targetTime: 12345,
+            });
+
+            expect(nextState).not.toBe(state);
+            expect(nextState.post1.metadata.reminder_target_time).toBe(12345);
+        });
+
+        it('should do nothing when updating reminder metadata for a missing post', () => {
+            const state = deepFreeze({
+                post1: {
+                    id: 'post1',
+                },
+            });
+
+            const nextState = reducers.handlePosts(state, {
+                type: PostTypes.POST_REMINDER_UPDATED,
+                postId: 'post2',
+                targetTime: 12345,
+            });
+
+            expect(nextState).toBe(state);
+        });
+    });
+
     describe('received multiple posts', () => {
         it('should do nothing when post list is empty', () => {
             const state = deepFreeze({

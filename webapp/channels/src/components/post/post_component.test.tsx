@@ -620,6 +620,60 @@ describe('PostComponent', () => {
         });
     });
 
+    describe('reminder indicator', () => {
+        test('should show reminder label and highlight for post with active reminder metadata', () => {
+            const post = TestHelper.getPostMock({
+                metadata: {
+                    reminder_target_time: Math.floor(Date.now() / 1000) + 3600,
+                },
+            });
+            const props = {
+                ...baseProps,
+                post,
+            };
+
+            renderWithContext(<PostComponent {...props}/>);
+
+            expect(screen.getByTestId('post-reminder-label')).toHaveTextContent('Reminder set');
+            expect(screen.getByTestId('postView')).toHaveClass('post--has-reminder');
+        });
+
+        test('should not show reminder label for expired reminder metadata', () => {
+            const post = TestHelper.getPostMock({
+                metadata: {
+                    reminder_target_time: Math.floor(Date.now() / 1000) - 3600,
+                },
+            });
+            const props = {
+                ...baseProps,
+                post,
+            };
+
+            renderWithContext(<PostComponent {...props}/>);
+
+            expect(screen.queryByTestId('post-reminder-label')).not.toBeInTheDocument();
+            expect(screen.getByTestId('postView')).not.toHaveClass('post--has-reminder');
+        });
+
+        test('should not show reminder label for deleted post with reminder metadata', () => {
+            const post = TestHelper.getPostMock({
+                state: Posts.POST_DELETED as 'DELETED',
+                metadata: {
+                    reminder_target_time: Math.floor(Date.now() / 1000) + 3600,
+                },
+            });
+            const props = {
+                ...baseProps,
+                post,
+            };
+
+            renderWithContext(<PostComponent {...props}/>);
+
+            expect(screen.queryByTestId('post-reminder-label')).not.toBeInTheDocument();
+            expect(screen.getByTestId('postView')).not.toHaveClass('post--has-reminder');
+        });
+    });
+
     describe('AI-generated indicator', () => {
         const aiGeneratedPost = TestHelper.getPostMock({
             channel_id: channel.id,

@@ -85,6 +85,7 @@ export type PostMetadata = {
     expire_at?: number;
     recipients?: string[];
     redacted_file_count?: number;
+    reminder_target_time?: number;
 };
 
 export type Post = {

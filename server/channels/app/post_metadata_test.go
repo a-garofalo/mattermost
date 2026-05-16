@@ -166,6 +166,54 @@ func TestPreparePostForClient(t *testing.T) {
 		assert.Equal(t, clientPost, post, "shouldn't have changed any metadata")
 	})
 
+	t.Run("reminder target time for current user", func(t *testing.T) {
+		th := setup(t)
+		th.Context.Session().UserId = th.BasicUser.Id
+
+		post := th.CreatePost(t, th.BasicChannel)
+		targetTime := time.Now().UTC().Add(time.Hour).Unix()
+		require.NoError(t, th.App.Srv().Store().Post().SetPostReminder(&model.PostReminder{
+			PostId:     post.Id,
+			UserId:     th.BasicUser.Id,
+			TargetTime: targetTime,
+		}))
+		require.NoError(t, th.App.Srv().Store().Post().SetPostReminder(&model.PostReminder{
+			PostId:     post.Id,
+			UserId:     th.BasicUser2.Id,
+			TargetTime: targetTime + int64(time.Hour.Seconds()),
+		}))
+
+		clientPost := th.App.PreparePostForClient(th.Context, post, &model.PreparePostForClientOpts{})
+		require.NotNil(t, clientPost.Metadata)
+		assert.Equal(t, targetTime, clientPost.Metadata.ReminderTargetTime)
+	})
+
+	t.Run("reminder target time omitted for other users and expired reminders", func(t *testing.T) {
+		th := setup(t)
+		th.Context.Session().UserId = th.BasicUser.Id
+
+		post := th.CreatePost(t, th.BasicChannel)
+		require.NoError(t, th.App.Srv().Store().Post().SetPostReminder(&model.PostReminder{
+			PostId:     post.Id,
+			UserId:     th.BasicUser2.Id,
+			TargetTime: time.Now().UTC().Add(time.Hour).Unix(),
+		}))
+
+		clientPost := th.App.PreparePostForClient(th.Context, post, &model.PreparePostForClientOpts{})
+		require.NotNil(t, clientPost.Metadata)
+		assert.Zero(t, clientPost.Metadata.ReminderTargetTime)
+
+		require.NoError(t, th.App.Srv().Store().Post().SetPostReminder(&model.PostReminder{
+			PostId:     post.Id,
+			UserId:     th.BasicUser.Id,
+			TargetTime: time.Now().UTC().Add(-time.Hour).Unix(),
+		}))
+
+		clientPost = th.App.PreparePostForClient(th.Context, post, &model.PreparePostForClientOpts{})
+		require.NotNil(t, clientPost.Metadata)
+		assert.Zero(t, clientPost.Metadata.ReminderTargetTime)
+	})
+
 	t.Run("priority read from master when context flag set", func(t *testing.T) {
 		// Verifies priority is read from master DB when master context flag is set
 		th := setup(t)

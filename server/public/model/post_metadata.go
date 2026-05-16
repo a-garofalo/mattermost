@@ -41,8 +41,9 @@ type PostMetadata struct {
 	// Translations holds translation data for configured target languages, keyed by language code
 	Translations map[string]*PostTranslation `json:"translations,omitempty"`
 
-	ExpireAt   int64    `json:"expire_at,omitempty"`
-	Recipients []string `json:"recipients,omitempty"`
+	ExpireAt           int64    `json:"expire_at,omitempty"`
+	Recipients         []string `json:"recipients,omitempty"`
+	ReminderTargetTime int64    `json:"reminder_target_time,omitempty"`
 }
 
 // PostTranslation represents a translation of a post in a specific language
@@ -64,15 +65,16 @@ func (p *PostMetadata) Auditable() map[string]any {
 	}
 
 	return map[string]any{
-		"embeds":              embeds,
-		"emojis":              p.Emojis,
-		"files":               p.Files,
-		"images":              p.Images,
-		"reactions":           p.Reactions,
-		"priority":            p.Priority,
-		"acknowledgements":    p.Acknowledgements,
-		"translations":        p.Translations,
-		"redacted_file_count": p.RedactedFileCount,
+		"embeds":               embeds,
+		"emojis":               p.Emojis,
+		"files":                p.Files,
+		"images":               p.Images,
+		"reactions":            p.Reactions,
+		"priority":             p.Priority,
+		"acknowledgements":     p.Acknowledgements,
+		"translations":         p.Translations,
+		"redacted_file_count":  p.RedactedFileCount,
+		"reminder_target_time": p.ReminderTargetTime,
 	}
 }
 
@@ -110,6 +112,9 @@ func (p *PostMetadata) Copy() *PostMetadata {
 	translationsCopy := map[string]*PostTranslation{}
 	maps.Copy(translationsCopy, p.Translations)
 
+	recipientsCopy := make([]string, len(p.Recipients))
+	copy(recipientsCopy, p.Recipients)
+
 	var postPriorityCopy *PostPriority
 	if p.Priority != nil {
 		postPriorityCopy = &PostPriority{
@@ -122,14 +127,17 @@ func (p *PostMetadata) Copy() *PostMetadata {
 	}
 
 	return &PostMetadata{
-		Embeds:            embedsCopy,
-		Emojis:            emojisCopy,
-		Files:             filesCopy,
-		Images:            imagesCopy,
-		Reactions:         reactionsCopy,
-		Priority:          postPriorityCopy,
-		Acknowledgements:  acknowledgementsCopy,
-		Translations:      translationsCopy,
-		RedactedFileCount: p.RedactedFileCount,
+		Embeds:             embedsCopy,
+		Emojis:             emojisCopy,
+		Files:              filesCopy,
+		Images:             imagesCopy,
+		Reactions:          reactionsCopy,
+		Priority:           postPriorityCopy,
+		Acknowledgements:   acknowledgementsCopy,
+		Translations:       translationsCopy,
+		RedactedFileCount:  p.RedactedFileCount,
+		ExpireAt:           p.ExpireAt,
+		Recipients:         recipientsCopy,
+		ReminderTargetTime: p.ReminderTargetTime,
 	}
 }

@@ -5873,6 +5873,8 @@
   "post.redacted_files.subtitle": "Access to files is restricted based on attributes",
   "post.redacted_files.title": "Files not available",
   "post.reminder.acknowledgement": "You will be reminded at {reminderTime}, {reminderDate} about this message from {username}: {permaLink}",
+  "post.reminder.indicator.label": "Reminder set",
+  "post.reminder.indicator.tooltip": "Reminder set for this message",
   "post.reminder.systemBot": "Hi there, here's your reminder about this message from {username}: {permaLink}",
   "post.renderError.message": "An error occurred while rendering this post.",
   "post.renderError.retry": "Retry",
