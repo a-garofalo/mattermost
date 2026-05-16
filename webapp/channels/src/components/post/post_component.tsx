@@ -15,6 +15,7 @@ import type {UserProfile} from '@mattermost/types/users';
 import {Posts} from 'mattermost-redux/constants/index';
 import {
     isMeMessage as checkIsMeMessage,
+    isPostEphemeral,
     isPostPendingOrFailed} from 'mattermost-redux/utils/post_utils';
 
 import BurnOnReadConfirmationModal from 'components/burn_on_read_confirmation_modal';
@@ -112,6 +113,7 @@ export type Props = {
         openModal: <P>(modalData: ModalData<P>) => void;
         closeModal: (modalId: string) => void;
         highlightPostInChannelPopout: (postId: string) => void;
+        dismissPostReminder: (postId: string) => void;
     };
     timestampProps?: Partial<TimestampProps>;
     shouldHighlight?: boolean;
@@ -138,13 +140,14 @@ export type Props = {
     burnOnReadSkipConfirmation?: boolean;
     preventClickInteraction?: boolean;
     permissionPoliciesEnabled: boolean;
+    postReminderTargetTime?: number;
 };
 
 const preventInteractionStyle: React.CSSProperties = {pointerEvents: 'none'};
 
 function PostComponent(props: Props) {
     const {post, shouldHighlight, togglePostMenu} = props;
-    const {formatMessage} = useIntl();
+    const {formatMessage, formatDate, formatTime, locale} = useIntl();
 
     const isSearchResultItem = (props.matches && props.matches.length > 0) || props.isMentionSearch || (props.term && props.term.length > 0);
     const isRHS = props.location === Locations.RHS_ROOT || props.location === Locations.RHS_COMMENT || props.location === Locations.SEARCH;
@@ -160,10 +163,44 @@ function PostComponent(props: Props) {
     const [fadeOutHighlight, setFadeOutHighlight] = useState(false);
     const [alt, setAlt] = useState(false);
     const [hasReceivedA11yFocus, setHasReceivedA11yFocus] = useState(false);
+    const [reminderTimeTick, setReminderTimeTick] = useState(0);
+    useEffect(() => {
+        const target = props.postReminderTargetTime;
+        if (!target || isPostEphemeral(post)) {
+            return undefined;
+        }
+        if (target <= Math.floor(Date.now() / 1000)) {
+            return undefined;
+        }
+        const id = window.setInterval(() => {
+            setReminderTimeTick((n) => n + 1);
+        }, 15000);
+        return () => clearInterval(id);
+    }, [props.postReminderTargetTime, post]);
+
+    useEffect(() => {
+        const target = props.postReminderTargetTime;
+        if (!target || isPostEphemeral(post)) {
+            return;
+        }
+        if (target <= Math.floor(Date.now() / 1000)) {
+            props.actions.dismissPostReminder(post.id);
+        }
+    }, [props.postReminderTargetTime, post.id, post, props.actions]);
+
+    const isPostReminderActive = useMemo(() => Boolean(
+        props.postReminderTargetTime &&
+        props.postReminderTargetTime > Math.floor(Date.now() / 1000) &&
+        !isPostEphemeral(post),
+    ), [props.postReminderTargetTime, post, reminderTimeTick]);
+
+    const handleDismissPostReminder = useCallback((e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        props.actions.dismissPostReminder(post.id);
+    }, [post.id, props.actions]);
     const [burnOnReadRevealing, setBurnOnReadRevealing] = useState(false);
     const [burnOnReadRevealError, setBurnOnReadRevealError] = useState<string | null>(null);
-
-    const {locale} = useIntl();
 
     const isSystemMessage = PostUtils.isSystemMessage(post);
     const fromAutoResponder = PostUtils.fromAutoResponder(post);
@@ -328,6 +365,7 @@ function PostComponent(props: Props) {
             'post--hide-controls': post.failed || post.state === Posts.POST_DELETED,
             'post--comment same--root': fromAutoResponder,
             'post--pinned-or-flagged': (post.is_pinned || props.isFlagged) && props.location === Locations.CENTER,
+            'post--reminder-set': isPostReminderActive,
             'mention-comment': props.isCommentMention,
             'post--thread': isRHS,
             'post--modal': isModal,
@@ -657,6 +695,53 @@ function PostComponent(props: Props) {
         priority = <span className='d-flex'><PriorityLabel priority={post.metadata.priority.priority}/></span>;
     }
 
+    let postReminderPill;
+    if (isPostReminderActive && props.postReminderTargetTime) {
+        const fireAt = new Date(props.postReminderTargetTime * 1000);
+        const reminderTooltip = formatMessage(
+            {
+                id: 'post_info.post_reminder.badge_tooltip',
+                defaultMessage: 'Reminder set for {dateTime}',
+            },
+            {
+                dateTime: `${formatDate(fireAt)} ${formatTime(fireAt)}`,
+            },
+        );
+        postReminderPill = (
+            <WithTooltip title={reminderTooltip}>
+                <span
+                    className='post-reminder-pill'
+                    role='status'
+                >
+                    <i
+                        className='icon icon-clock-outline'
+                        aria-hidden='true'
+                    />
+                    <span className='post-reminder-pill__text'>
+                        <FormattedMessage
+                            id='post_info.post_reminder.badge'
+                            defaultMessage='Reminder set'
+                        />
+                    </span>
+                    <button
+                        type='button'
+                        className='post-reminder-pill__dismiss btn btn-icon btn-xs'
+                        onClick={handleDismissPostReminder}
+                        aria-label={formatMessage({
+                            id: 'post_info.post_reminder.dismiss',
+                            defaultMessage: 'Hide reminder indicator',
+                        })}
+                    >
+                        <i
+                            className='icon icon-close'
+                            aria-hidden='true'
+                        />
+                    </button>
+                </span>
+            </WithTooltip>
+        );
+    }
+
     // Burn-on-Read badge logic
     // Badge handles expiration scheduling internally via BurnOnReadExpirationHandler
     // Only shows on first post in series (not consecutive posts)
@@ -813,6 +898,7 @@ function PostComponent(props: Props) {
                                     />
                                 }
                                 {priority}
+                                {postReminderPill}
                                 {burnOnReadBadge}
                                 {burnOnReadTimerChip}
                                 {((!props.compactDisplay && !(hasSameRoot(props) && props.isConsecutivePost)) || (props.compactDisplay && isRHS)) &&

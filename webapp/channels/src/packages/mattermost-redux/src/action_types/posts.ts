@@ -66,4 +66,8 @@ export default keyMirror({
     REVEAL_BURN_ON_READ_SUCCESS: null,
     POST_RECIPIENTS_UPDATED: null,
     BURN_ON_READ_ALL_REVEALED: null,
+
+    RECEIVED_POST_REMINDER: null,
+    REMOVED_POST_REMINDER: null,
+    REPLACED_POST_REMINDERS: null,
 });
