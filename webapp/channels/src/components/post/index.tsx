@@ -9,11 +9,13 @@ import type {Dispatch} from 'redux';
 import type {Emoji} from '@mattermost/types/emojis';
 import type {Post} from '@mattermost/types/posts';
 
+import {dismissPostReminder} from 'mattermost-redux/actions/post_reminders';
 import {savePreferences} from 'mattermost-redux/actions/preferences';
 import {General, Preferences as ReduxPreferences} from 'mattermost-redux/constants';
 import {getDirectTeammate, isMyChannelAutotranslated} from 'mattermost-redux/selectors/entities/channels';
 import {getConfig, isPermissionPoliciesEnabled} from 'mattermost-redux/selectors/entities/general';
 import {getCurrentUserLocale} from 'mattermost-redux/selectors/entities/i18n';
+import {getPostReminderTargetTime} from 'mattermost-redux/selectors/entities/post_reminders';
 import {getPost, makeGetCommentCountForPost, makeIsPostCommentMention, isPostAcknowledgementsEnabled, isPostPriorityEnabled, isPostFlagged} from 'mattermost-redux/selectors/entities/posts';
 import type {UserActivityPost} from 'mattermost-redux/selectors/entities/posts';
 import {
@@ -247,6 +249,7 @@ function makeMapStateToProps() {
             burnOnReadSkipConfirmation: getBool(state, ReduxPreferences.CATEGORY_BURN_ON_READ, ReduxPreferences.BURN_ON_READ_SKIP_CONFIRMATION, false),
             isBurnOnReadPost: isPostBurnOnRead,
             permissionPoliciesEnabled,
+            postReminderTargetTime: getPostReminderTargetTime(state, post.id),
         };
     };
 }
@@ -268,6 +271,7 @@ function mapDispatchToProps(dispatch: Dispatch) {
             savePreferences,
             openModal,
             closeModal,
+            dismissPostReminder,
         }, dispatch),
     };
 }

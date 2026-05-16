@@ -2251,6 +2251,58 @@
     }
 }
 
+.app__body .app__content .post.post--reminder-set {
+    box-shadow: inset 3px 0 0 0 var(--link-color);
+    background-color: rgba(var(--link-color-rgb), 0.06);
+}
+
+.post-reminder-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: 6px;
+    padding: 0 4px 0 6px;
+    height: 22px;
+    border-radius: 4px;
+    background: rgba(var(--link-color-rgb), 0.12);
+    color: var(--link-color);
+    font-size: 11px;
+    font-weight: 600;
+
+    .icon-clock-outline {
+        font-size: 14px;
+        line-height: 1;
+    }
+
+    &__text {
+        line-height: 1;
+        white-space: nowrap;
+    }
+
+    &__dismiss {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 22px;
+        height: 22px;
+        padding: 0;
+        border: 0;
+        border-radius: 4px;
+        margin: 0;
+        background: transparent;
+        color: inherit;
+
+        &:hover {
+            background: rgba(var(--link-color-rgb), 0.16);
+        }
+
+        .icon-close {
+            font-size: 12px;
+            line-height: 1;
+        }
+    }
+}
+
 .post__header-set-custom-status {
     display: none;
 }

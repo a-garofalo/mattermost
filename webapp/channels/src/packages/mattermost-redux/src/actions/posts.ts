@@ -40,6 +40,8 @@ import {isCombinedUserActivityPost} from 'mattermost-redux/utils/post_list';
 
 import {logError, LogErrorBarMode} from './errors';
 
+export {dismissPostReminder, hydratePostReminders} from './post_reminders';
+
 // receivedPost should be dispatched after a single post from the server. This typically happens when an existing post
 // is updated.
 export function receivedPost(post: Post, crtEnabled?: boolean) {
@@ -1223,6 +1225,10 @@ export function addPostReminder(userId: string, postId: string, timestamp: numbe
             dispatch(logError(error));
             return {error};
         }
+        dispatch({
+            type: PostTypes.RECEIVED_POST_REMINDER,
+            data: {postId, targetTime: timestamp},
+        });
         return {data: true};
     };
 }

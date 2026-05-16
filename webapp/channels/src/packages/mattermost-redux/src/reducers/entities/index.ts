@@ -21,6 +21,7 @@ import integrations from './integrations';
 import jobs from './jobs';
 import limits from './limits';
 import posts from './posts';
+import postReminders from './post_reminders';
 import preferences from './preferences';
 import properties from './properties';
 import recaps from './recaps';
@@ -43,6 +44,7 @@ export default combineReducers({
     teams,
     channels,
     posts,
+    postReminders,
     files,
     preferences,
     recaps,

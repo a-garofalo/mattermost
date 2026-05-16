@@ -58,6 +58,7 @@ describe('PostComponent', () => {
             openModal: jest.fn(),
             closeModal: jest.fn(),
             highlightPostInChannelPopout: jest.fn(),
+            dismissPostReminder: jest.fn(),
         },
         isChannelAutotranslated: false,
     };
@@ -617,6 +618,22 @@ describe('PostComponent', () => {
             renderWithContext(<PostComponent {...props}/>);
 
             expect(screen.queryByTestId('post-priority-label')).not.toBeInTheDocument();
+        });
+    });
+
+    describe('post reminder indicator', () => {
+        test('shows post reminder pill and highlight class when reminder is active', () => {
+            const future = Math.floor(Date.now() / 1000) + 3600;
+            const post = TestHelper.getPostMock({channel_id: channel.id});
+            const props = {
+                ...baseProps,
+                post,
+                postReminderTargetTime: future,
+            };
+            const {container} = renderWithContext(<PostComponent {...props}/>);
+
+            expect(screen.getByText('Reminder set')).toBeInTheDocument();
+            expect(container.querySelector('.post.post--reminder-set')).toBeTruthy();
         });
     });
 

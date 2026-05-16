@@ -9,11 +9,12 @@ import type {FileInfo} from '@mattermost/types/files';
 import type {Post} from '@mattermost/types/posts';
 import type {ScheduledPost} from '@mattermost/types/schedule_post';
 
-import {SearchTypes} from 'mattermost-redux/action_types';
+import {PostTypes, SearchTypes} from 'mattermost-redux/action_types';
 import {getMyChannelMember} from 'mattermost-redux/actions/channels';
 import * as PostActions from 'mattermost-redux/actions/posts';
 import {createSchedulePost} from 'mattermost-redux/actions/scheduled_posts';
 import * as ThreadActions from 'mattermost-redux/actions/threads';
+import {Posts} from 'mattermost-redux/constants';
 import {getChannel, getMyChannelMember as getMyChannelMemberSelector} from 'mattermost-redux/selectors/entities/channels';
 import {makeGetFilesForPost} from 'mattermost-redux/selectors/entities/files';
 import {getConfig} from 'mattermost-redux/selectors/entities/general';
@@ -82,6 +83,27 @@ export function handleNewPost(post: Post, msg?: WebSocketMessages.Posted | WebSo
         }
 
         dispatch(completePostReceive(post, websocketMessageProps, myChannelMemberDoesntExist));
+
+        if (
+            post.type === Posts.POST_TYPES.EPHEMERAL &&
+            post.props?.type === Posts.POST_TYPES.REMINDER &&
+            post.user_id === getCurrentUserId(getState())
+        ) {
+            const remindedPostId = typeof post.props.post_id === 'string' ? post.props.post_id : '';
+            const rawTarget = post.props.target_time;
+            let targetTime = 0;
+            if (typeof rawTarget === 'number') {
+                targetTime = rawTarget;
+            } else if (typeof rawTarget === 'string') {
+                targetTime = parseInt(rawTarget, 10);
+            }
+            if (remindedPostId && targetTime > 0) {
+                dispatch({
+                    type: PostTypes.RECEIVED_POST_REMINDER,
+                    data: {postId: remindedPostId, targetTime},
+                });
+            }
+        }
 
         if (msg && msg.data && 'channel_type' in msg.data) {
             if (msg.data.channel_type === Constants.DM_CHANNEL) {

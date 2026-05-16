@@ -103,6 +103,8 @@ export type GlobalState = {
         };
         contentFlagging: ContentFlaggingState;
         properties: PropertiesState;
+        /** Maps post id to reminder target time (Unix seconds) for the signed-in user */
+        postReminders: Record<string, number>;
     };
     errors: any[];
     requests: {
